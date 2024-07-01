@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"github.com/snail007/goproxy/utils"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/blanc2463/goproxy/utils"
 )
 
 type BridgeItem struct {

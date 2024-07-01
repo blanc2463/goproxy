@@ -7,11 +7,12 @@ import (
 	"io"
 	"log"
 	"net"
-	"github.com/snail007/goproxy/utils"
 	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/blanc2463/goproxy/utils"
 )
 
 type UDP struct {

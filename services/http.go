@@ -5,9 +5,10 @@ import (
 	"io"
 	"log"
 	"net"
-	"github.com/snail007/goproxy/utils"
 	"runtime/debug"
 	"strconv"
+
+	"github.com/blanc2463/goproxy/utils"
 )
 
 type HTTP struct {

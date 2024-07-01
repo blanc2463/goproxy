@@ -5,9 +5,10 @@ import (
 	"io"
 	"log"
 	"net"
-	"github.com/snail007/goproxy/utils"
 	"runtime/debug"
 	"time"
+
+	"github.com/blanc2463/goproxy/utils"
 
 	"strconv"
 )
