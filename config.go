@@ -102,7 +102,7 @@ func initConfig() (err error) {
 	tunnelClientArgs.Args = args
 	tunnelServerArgs.Args = args
 
-	poster()
+	//poster()
 	//regist services and run service
 	serviceName := kingpin.MustParse(app.Parse(os.Args[1:]))
 	services.Regist("http", services.NewHTTP(), httpArgs)
