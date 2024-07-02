@@ -1,0 +1,6 @@
+SET CGO_ENABLED=0
+#SET CGO_OS_LINUX=1
+SET GOOS=linux
+SET GOARCH=amd64
+go build 
+pause
