@@ -6,10 +6,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -32,9 +32,9 @@ type CheckerItem struct {
 	FailCount    uint
 }
 
-// NewChecker args:
-// timeout : tcp timeout milliseconds ,connect to host
-// interval: recheck domain interval seconds
+//NewChecker args:
+//timeout : tcp timeout milliseconds ,connect to host
+//interval: recheck domain interval seconds
 func NewChecker(timeout int, interval int64, blockedFile, directFile string) Checker {
 	ch := Checker{
 		data:     NewConcurrentMap(),
@@ -56,7 +56,7 @@ func NewChecker(timeout int, interval int64, blockedFile, directFile string) Che
 func (c *Checker) loadMap(f string) (dataMap ConcurrentMap) {
 	dataMap = NewConcurrentMap()
 	if PathExists(f) {
-		_contents, err := os.ReadFile(f)
+		_contents, err := ioutil.ReadFile(f)
 		if err != nil {
 			log.Printf("load file err:%s", err)
 			return
@@ -183,7 +183,7 @@ func NewBasicAuth() BasicAuth {
 	}
 }
 func (ba *BasicAuth) AddFromFile(file string) (n int, err error) {
-	_content, err := os.ReadFile(file)
+	_content, err := ioutil.ReadFile(file)
 	if err != nil {
 		return
 	}
@@ -237,7 +237,7 @@ type HTTPRequest struct {
 	basicAuth   *BasicAuth
 }
 
-func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *BasicAuth) (req HTTPRequest, host, auth string, err error) {
+func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *BasicAuth) (req HTTPRequest, err error) {
 	buf := make([]byte, bufSize)
 	len := 0
 	req = HTTPRequest{
@@ -252,12 +252,6 @@ func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *
 		return
 	}
 	req.HeadBuf = buf[:len]
-	host, auth, err = req.ModifyHeaderAuth()
-	if err != nil {
-		CloseConn(inConn)
-		return
-	}
-
 	index := bytes.IndexByte(req.HeadBuf, '\n')
 	if index == -1 {
 		err = fmt.Errorf("http decoder data line err:%s", string(req.HeadBuf)[:50])
@@ -273,16 +267,13 @@ func NewHTTPRequest(inConn *net.Conn, bufSize int, isBasicAuth bool, basicAuth *
 	req.Method = strings.ToUpper(req.Method)
 	req.isBasicAuth = isBasicAuth
 	req.basicAuth = basicAuth
-	req.Host = host
-	log.Printf("%s:%s %s", req.Method, req.Host, auth)
+	log.Printf("%s:%s", req.Method, req.hostOrURL)
 
-	/*
-		if req.IsHTTPS() {
-			err = req.HTTPS()
-		} else {
-			err = req.HTTP()
-		}
-	*/
+	if req.IsHTTPS() {
+		err = req.HTTPS()
+	} else {
+		err = req.HTTP()
+	}
 	return
 }
 func (req *HTTPRequest) HTTP() (err error) {
@@ -372,55 +363,6 @@ func (req *HTTPRequest) getHeader(key string) (val string, err error) {
 		}
 	}
 	err = fmt.Errorf("can not find HOST header")
-	return
-}
-
-func (req *HTTPRequest) ModifyHeaderAuth() (host, auth string, err error) {
-	//Proxy-Authorization: Basic MTc3LjIzNC4xNDAuMTYwXxxxxxxxxxmYzRlNaTA==\r\n"
-	authorization, err := req.getHeader("Proxy-Authorization")
-	if err != nil {
-		fmt.Fprint((*req.conn), "HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"\"\r\n\r\nUnauthorized")
-		CloseConn(req.conn)
-		return
-	}
-
-	//log.Printf("Authorization:%s", authorization)
-	basic := strings.Fields(authorization)
-	if len(basic) != 2 {
-		err = fmt.Errorf("authorization data error,ERR:%s", authorization)
-		CloseConn(req.conn)
-		return
-	}
-	user, err := base64.StdEncoding.DecodeString(basic[1])
-	if err != nil {
-		err = fmt.Errorf("authorization data parse error,ERR:%s", err)
-		CloseConn(req.conn)
-		return
-	}
-	decodeOldAuth := string(user)
-	//decodeOldAuth格式 ip_port_user:port
-	a1 := strings.Split(decodeOldAuth, ":")
-	if len(a1) != 2 {
-		err = fmt.Errorf("authorization data error,ERR:%s", decodeOldAuth)
-		CloseConn(req.conn)
-		return
-	}
-	password := a1[1]
-	a2 := strings.Split(a1[0], "_")
-	if len(a2) != 3 {
-		err = fmt.Errorf("authorization data error,ERR:%s", decodeOldAuth)
-		CloseConn(req.conn)
-		return
-	}
-	ip := a2[0]
-	port := a2[1]
-	usr := a2[2]
-	host = ip + ":" + port
-	auth = usr + ":" + password
-	newAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	oldHead := string(req.HeadBuf)
-	newHead := strings.Replace(oldHead, authorization, newAuth, 1)
-	req.HeadBuf = []byte(newHead)
 	return
 }
 
