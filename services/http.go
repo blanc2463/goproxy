@@ -117,15 +117,25 @@ func (s *HTTP) OutToTCP(useProxy bool, address string, inConn *net.Conn, req *ut
 		return
 	}
 	var outConn net.Conn
-	var _outConn interface{}
-	if useProxy {
-		_outConn, err = s.outPool.Pool.Get()
-		if err == nil {
-			outConn = _outConn.(net.Conn)
+	//原来使用出口池子
+	/*
+		var _outConn interface{}
+		if useProxy {
+			_outConn, err = s.outPool.Pool.Get()
+			if err == nil {
+				outConn = _outConn.(net.Conn)
+			}
+		} else {
+			outConn, err = utils.ConnectHost(address, *s.cfg.Timeout)
 		}
-	} else {
-		outConn, err = utils.ConnectHost(address, *s.cfg.Timeout)
+	*/
+	outConn, err = utils.ConnectHost(address, *s.cfg.Timeout)
+	if err != nil {
+		log.Printf("connect to %s , err:%s", *s.cfg.Parent, err)
+		utils.CloseConn(inConn)
+		return
 	}
+
 	if err != nil {
 		log.Printf("connect to %s , err:%s", *s.cfg.Parent, err)
 		utils.CloseConn(inConn)
