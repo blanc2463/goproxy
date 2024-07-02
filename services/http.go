@@ -70,7 +70,7 @@ func (s *HTTP) callback(inConn net.Conn) {
 			log.Printf("http(s) conn handler crashed with err : %s \nstack: %s", err, string(debug.Stack()))
 		}
 	}()
-	req, err := utils.NewHTTPRequest(&inConn, 4096, s.IsBasicAuth(), &s.basicAuth)
+	req, host, auth, err := utils.NewHTTPRequest(&inConn, 4096, s.IsBasicAuth(), &s.basicAuth)
 	if err != nil {
 		if err != io.EOF {
 			log.Printf("decoder error , form %s, ERR:%s", err, inConn.RemoteAddr())
@@ -82,7 +82,7 @@ func (s *HTTP) callback(inConn net.Conn) {
 
 	useProxy := true
 	if *s.cfg.Parent == "" {
-		useProxy = false
+		useProxy = true //useProxy = false
 	} else if *s.cfg.Always {
 		useProxy = true
 	} else {
@@ -95,7 +95,7 @@ func (s *HTTP) callback(inConn net.Conn) {
 		useProxy, _, _ = s.checker.IsBlocked(req.Host)
 		//log.Printf("blocked ? : %v, %s , fail:%d ,success:%d", useProxy, address, n, m)
 	}
-	log.Printf("use proxy : %v, %s", useProxy, address)
+	log.Printf("use proxy : %v, %s host:%s, auth:%s", useProxy, address, host, auth)
 	//os.Exit(0)
 	err = s.OutToTCP(useProxy, address, &inConn, &req)
 	if err != nil {
