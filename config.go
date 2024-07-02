@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -131,12 +130,12 @@ func poster() {
 		v%s`+" by snail , blog : http://www.host900.com/\n\n", APP_VERSION)
 }
 func tlsBytes(cert, key string) (certBytes, keyBytes []byte) {
-	certBytes, err := ioutil.ReadFile(cert)
+	certBytes, err := os.ReadFile(cert)
 	if err != nil {
 		log.Fatalf("err : %s", err)
 		return
 	}
-	keyBytes, err = ioutil.ReadFile(key)
+	keyBytes, err = os.ReadFile(key)
 	if err != nil {
 		log.Fatalf("err : %s", err)
 		return
