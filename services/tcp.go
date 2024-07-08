@@ -99,11 +99,11 @@ func (s *TCP) OutToTCP(inConn *net.Conn) (err error) {
 	outAddr := outConn.RemoteAddr().String()
 	outLocalAddr := outConn.LocalAddr().String()
 	utils.IoBind((*inConn), outConn, func(isSrcErr bool, err error) {
-		log.Printf("conn %s - %s - %s -%s released", inAddr, inLocalAddr, outLocalAddr, outAddr)
+		log.Printf("tcp outtoTcp conn %s - %s - %s -%s released", inAddr, inLocalAddr, outLocalAddr, outAddr)
 		utils.CloseConn(inConn)
 		utils.CloseConn(&outConn)
 	}, func(n int, d bool) {}, 0)
-	log.Printf("conn %s - %s - %s -%s connected", inAddr, inLocalAddr, outLocalAddr, outAddr)
+	log.Printf("tcp outtoTcp conn %s - %s - %s -%s connected", inAddr, inLocalAddr, outLocalAddr, outAddr)
 	return
 }
 func (s *TCP) OutToUDP(inConn *net.Conn) (err error) {

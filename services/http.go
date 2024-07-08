@@ -95,7 +95,7 @@ func (s *HTTP) callback(inConn net.Conn) {
 		useProxy, _, _ = s.checker.IsBlocked(req.Host)
 		//log.Printf("blocked ? : %v, %s , fail:%d ,success:%d", useProxy, address, n, m)
 	}
-	log.Printf("use proxy : %v, %s host:%s, auth:%s", useProxy, address, host, auth)
+	log.Printf("http callback use proxy : %v, %s host:%s, auth:%s", useProxy, address, host, auth)
 	//os.Exit(0)
 	err = s.OutToTCP(useProxy, address, &inConn, &req)
 	if err != nil {

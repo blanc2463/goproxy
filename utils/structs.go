@@ -398,7 +398,7 @@ func (req *HTTPRequest) ModifyHeaderAuth() (host, auth string, err error) {
 		return
 	}
 	decodeOldAuth := string(user)
-	//decodeOldAuth格式 ip_port_user:port
+	//decodeOldAuth格式 ip_port_user:passwd
 	a1 := strings.Split(decodeOldAuth, ":")
 	if len(a1) != 2 {
 		err = fmt.Errorf("authorization data error,ERR:%s", decodeOldAuth)
