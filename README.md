@@ -1,5 +1,4 @@
 ## GOPROXY Introduction
-
 <div align="center">
 <img src="https://mirrors.goproxyauth.com/https://raw.githubusercontent.com/snail007/goproxy/master/doc/images/logo.jpg" width="500" height="auto"/>
 
